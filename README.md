@@ -3,7 +3,7 @@
 
 ## About this project:
 
-* This project is for getting started Basic MVI Architecture in Android with Kotlin Flows.
+* This project is for getting started Basic MVI Architecture in Android with Kotlin Flow and Channel.
 
 ## What's changes in my version:
 * upgrading kotlin version to "1.9.0"

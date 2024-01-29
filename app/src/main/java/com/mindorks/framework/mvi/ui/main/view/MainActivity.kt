@@ -4,8 +4,10 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mindorks.framework.mvi.data.api.ApiHelperImpl
@@ -40,7 +42,9 @@ class MainActivity : AppCompatActivity() {
     private fun setupClicks() {
         binding.buttonFetchUser.setOnClickListener {
             lifecycleScope.launch {
-                mainViewModel.userIntent.send(MainIntent.FetchUser)
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    mainViewModel.userIntent.send(MainIntent.FetchUser)
+                }
             }
         }
     }
@@ -73,25 +77,29 @@ class MainActivity : AppCompatActivity() {
 
     private fun observeViewModel() {
         lifecycleScope.launch {
-            mainViewModel.state.collect {
-                when (it) {
-                    is MainState.Idle -> {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainViewModel.state.collect {
+                    when (it) {
+                        is MainState.Idle -> {
 
-                    }
-                    is MainState.Loading -> {
-                        binding.buttonFetchUser.visibility = View.GONE
-                        binding.progressBar.visibility = View.VISIBLE
-                    }
+                        }
 
-                    is MainState.Users -> {
-                        binding.progressBar.visibility = View.GONE
-                        binding.buttonFetchUser.visibility = View.GONE
-                        renderList(it.user)
-                    }
-                    is MainState.Error -> {
-                        binding.progressBar.visibility = View.GONE
-                        binding.buttonFetchUser.visibility = View.VISIBLE
-                        Toast.makeText(this@MainActivity, it.error, Toast.LENGTH_LONG).show()
+                        is MainState.Loading -> {
+                            binding.buttonFetchUser.visibility = View.GONE
+                            binding.progressBar.visibility = View.VISIBLE
+                        }
+
+                        is MainState.Users -> {
+                            binding.progressBar.visibility = View.GONE
+                            binding.buttonFetchUser.visibility = View.GONE
+                            renderList(it.user)
+                        }
+
+                        is MainState.Error -> {
+                            binding.progressBar.visibility = View.GONE
+                            binding.buttonFetchUser.visibility = View.VISIBLE
+                            Toast.makeText(this@MainActivity, it.error, Toast.LENGTH_LONG).show()
+                        }
                     }
                 }
             }
